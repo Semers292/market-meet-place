@@ -10,9 +10,9 @@ import { Input } from "@/components/ui/input";
 import {
   adminStatus, adminUnlock, adminLock,
   adminListPendingSellers, adminReviewSeller,
-  adminListUsers, adminListListings,
+  adminListUsers, adminListListings, adminReviewListing,
 } from "@/lib/admin-gate.functions";
-import { CheckCircle, XCircle, Users, ListChecks, ShieldCheck, Lock, LogOut } from "lucide-react";
+import { CheckCircle, XCircle, Users, ListChecks, ShieldCheck, Lock, LogOut, Clock } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Admin · SuqLink" }, { name: "robots", content: "noindex,nofollow" }] }),
@@ -93,8 +93,9 @@ function UnlockScreen({ onUnlocked }: { onUnlocked: () => void }) {
 
 function AdminPanel({ onLocked }: { onLocked: () => void }) {
   const lock = useServerFn(adminLock);
-  const [tab, setTab] = useState<"sellers" | "users" | "listings">("sellers");
+  const [tab, setTab] = useState<"sellers" | "pending-listings" | "users" | "listings">("pending-listings");
   const tabs = [
+    { id: "pending-listings", label: "Pending listings", icon: Clock },
     { id: "sellers", label: "Pending sellers", icon: ShieldCheck },
     { id: "users", label: "All users", icon: Users },
     { id: "listings", label: "All listings", icon: ListChecks },
@@ -119,6 +120,7 @@ function AdminPanel({ onLocked }: { onLocked: () => void }) {
           ))}
         </div>
         <div className="mt-6">
+          {tab === "pending-listings" && <PendingListingsTab />}
           {tab === "sellers" && <SellersTab />}
           {tab === "users" && <UsersTab />}
           {tab === "listings" && <ListingsTab />}
@@ -237,3 +239,69 @@ function ListingsTab() {
     </div>
   );
 }
+
+function PendingListingsTab() {
+  const list = useServerFn(adminListListings);
+  const review = useServerFn(adminReviewListing);
+  const qc = useQueryClient();
+  const { data, isLoading } = useQuery({
+    queryKey: ["admin-listings"],
+    queryFn: async () => (await list()).rows,
+  });
+  const [reason, setReason] = useState("");
+  const [openFor, setOpenFor] = useState<string | null>(null);
+
+  const pending = (data ?? []).filter((l: any) => l.status === "pending");
+
+  const act = async (listingId: string, action: "approve" | "reject") => {
+    try {
+      await review({ data: { listingId, action, reason: action === "reject" ? reason : undefined } });
+      toast.success(`Listing ${action}d`);
+      setOpenFor(null); setReason("");
+      qc.invalidateQueries({ queryKey: ["admin-listings"] });
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  if (isLoading) return <div className="text-muted-foreground">Loading…</div>;
+  if (pending.length === 0) return <div className="glow-card rounded-2xl p-12 text-center text-muted-foreground">No listings to review.</div>;
+
+  return (
+    <div className="space-y-4">
+      {pending.map((l: any) => (
+        <div key={l.id} className="glow-card rounded-2xl p-5">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <h3 className="font-medium">{l.title}</h3>
+              <p className="text-sm text-muted-foreground line-clamp-2">{l.description}</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {Number(l.price).toLocaleString()} {l.currency} · seller {l.profiles?.full_name ?? l.profiles?.phone}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" onClick={() => act(l.id, "approve")} className="bg-success text-success-foreground gap-1">
+                <CheckCircle className="h-4 w-4" />Approve
+              </Button>
+              <Button size="sm" variant="destructive" onClick={() => setOpenFor(l.id)} className="gap-1">
+                <XCircle className="h-4 w-4" />Reject
+              </Button>
+            </div>
+          </div>
+          {l.listing_images?.length > 0 && (
+            <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3">
+              {l.listing_images.slice(0, 4).map((img: any, i: number) => (
+                <img key={i} src={img.url} className="rounded-lg border border-border aspect-square object-cover" />
+              ))}
+            </div>
+          )}
+          {openFor === l.id && (
+            <div className="mt-3 flex gap-2">
+              <Input value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Rejection reason" className="bg-surface-2" />
+              <Button size="sm" variant="destructive" onClick={() => act(l.id, "reject")}>Confirm reject</Button>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+

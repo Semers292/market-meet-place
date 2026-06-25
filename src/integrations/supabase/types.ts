@@ -177,6 +177,7 @@ export type Database = {
           id: string
           location: string | null
           price: number
+          rejection_reason: string | null
           seller_id: string
           status: Database["public"]["Enums"]["listing_status"]
           title: string
@@ -192,6 +193,7 @@ export type Database = {
           id?: string
           location?: string | null
           price: number
+          rejection_reason?: string | null
           seller_id: string
           status?: Database["public"]["Enums"]["listing_status"]
           title: string
@@ -207,6 +209,7 @@ export type Database = {
           id?: string
           location?: string | null
           price?: number
+          rejection_reason?: string | null
           seller_id?: string
           status?: Database["public"]["Enums"]["listing_status"]
           title?: string
@@ -395,7 +398,7 @@ export type Database = {
       app_role: "buyer" | "seller" | "admin"
       contact_type: "phone" | "telegram" | "instagram" | "whatsapp" | "in_app"
       listing_condition: "new" | "used"
-      listing_status: "active" | "sold" | "removed"
+      listing_status: "active" | "sold" | "removed" | "pending" | "rejected"
       verification_status: "pending" | "approved" | "rejected"
     }
     CompositeTypes: {
@@ -527,7 +530,7 @@ export const Constants = {
       app_role: ["buyer", "seller", "admin"],
       contact_type: ["phone", "telegram", "instagram", "whatsapp", "in_app"],
       listing_condition: ["new", "used"],
-      listing_status: ["active", "sold", "removed"],
+      listing_status: ["active", "sold", "removed", "pending", "rejected"],
       verification_status: ["pending", "approved", "rejected"],
     },
   },

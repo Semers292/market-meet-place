@@ -47,6 +47,7 @@ export const createListing = createServerFn({ method: "POST" })
       currency: data.currency ?? "ETB",
       condition: data.condition ?? null,
       location: data.location ?? null,
+      status: "pending",
     }).select("id").single();
     if (error || !listing) throw new Error(error?.message ?? "Failed to create listing");
 

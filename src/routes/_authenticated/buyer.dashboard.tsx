@@ -17,8 +17,16 @@ export const Route = createFileRoute("/_authenticated/buyer/dashboard")({
 });
 
 function BuyerDashboard() {
-  const { user } = useAuth();
+  const { user, refresh } = useAuth();
   const { t } = useI18n();
+  const claim = useServerFn(claimFirstAdmin);
+  const { data: adminCount } = useQuery({
+    queryKey: ["admin-count"],
+    queryFn: async () => {
+      const { count } = await supabase.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "admin");
+      return count ?? 0;
+    },
+  });
   const { data: messages } = useQuery({
     queryKey: ["my-messages", user?.id],
     queryFn: async () => {

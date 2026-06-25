@@ -89,6 +89,7 @@ export const adminReviewSeller = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
 
     await supabaseAdmin.from("admin_logs").insert({
+      admin_id: null,
       action: `seller_${data.action}`,
       target: data.sellerId,
       metadata: data.reason ? { reason: data.reason } : null,

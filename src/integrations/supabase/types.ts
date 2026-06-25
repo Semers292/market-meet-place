@@ -177,6 +177,7 @@ export type Database = {
           id: string
           location: string | null
           price: number
+          rejection_reason: string | null
           seller_id: string
           status: Database["public"]["Enums"]["listing_status"]
           title: string
@@ -192,6 +193,7 @@ export type Database = {
           id?: string
           location?: string | null
           price: number
+          rejection_reason?: string | null
           seller_id: string
           status?: Database["public"]["Enums"]["listing_status"]
           title: string
@@ -207,6 +209,7 @@ export type Database = {
           id?: string
           location?: string | null
           price?: number
+          rejection_reason?: string | null
           seller_id?: string
           status?: Database["public"]["Enums"]["listing_status"]
           title?: string

@@ -14,7 +14,6 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ListingsIdRouteImport } from './routes/listings.$id'
-import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedSellerDashboardRouteImport } from './routes/_authenticated/seller.dashboard'
 import { Route as AuthenticatedBuyerDashboardRouteImport } from './routes/_authenticated/buyer.dashboard'
 import { Route as AuthenticatedSellerListingsNewRouteImport } from './routes/_authenticated/seller.listings.new'
@@ -43,11 +42,6 @@ const ListingsIdRoute = ListingsIdRouteImport.update({
   path: '/listings/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
 const AuthenticatedSellerDashboardRoute =
   AuthenticatedSellerDashboardRouteImport.update({
     id: '/seller/dashboard',
@@ -71,7 +65,6 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/browse': typeof BrowseRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/listings/$id': typeof ListingsIdRoute
   '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
   '/seller/dashboard': typeof AuthenticatedSellerDashboardRoute
@@ -81,7 +74,6 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/browse': typeof BrowseRoute
-  '/admin': typeof AuthenticatedAdminRoute
   '/listings/$id': typeof ListingsIdRoute
   '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
   '/seller/dashboard': typeof AuthenticatedSellerDashboardRoute
@@ -93,7 +85,6 @@ export interface FileRoutesById {
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/browse': typeof BrowseRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/listings/$id': typeof ListingsIdRoute
   '/_authenticated/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
   '/_authenticated/seller/dashboard': typeof AuthenticatedSellerDashboardRoute
@@ -105,7 +96,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/browse'
-    | '/admin'
     | '/listings/$id'
     | '/buyer/dashboard'
     | '/seller/dashboard'
@@ -115,7 +105,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/browse'
-    | '/admin'
     | '/listings/$id'
     | '/buyer/dashboard'
     | '/seller/dashboard'
@@ -126,7 +115,6 @@ export interface FileRouteTypes {
     | '/_authenticated'
     | '/auth'
     | '/browse'
-    | '/_authenticated/admin'
     | '/listings/$id'
     | '/_authenticated/buyer/dashboard'
     | '/_authenticated/seller/dashboard'
@@ -178,13 +166,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListingsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_authenticated/admin': {
-      id: '/_authenticated/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AuthenticatedAdminRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
     '/_authenticated/seller/dashboard': {
       id: '/_authenticated/seller/dashboard'
       path: '/seller/dashboard'
@@ -210,14 +191,12 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
   AuthenticatedBuyerDashboardRoute: typeof AuthenticatedBuyerDashboardRoute
   AuthenticatedSellerDashboardRoute: typeof AuthenticatedSellerDashboardRoute
   AuthenticatedSellerListingsNewRoute: typeof AuthenticatedSellerListingsNewRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
   AuthenticatedBuyerDashboardRoute: AuthenticatedBuyerDashboardRoute,
   AuthenticatedSellerDashboardRoute: AuthenticatedSellerDashboardRoute,
   AuthenticatedSellerListingsNewRoute: AuthenticatedSellerListingsNewRoute,
@@ -236,13 +215,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

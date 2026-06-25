@@ -49,6 +49,23 @@ function BuyerDashboard() {
           <Link to="/browse"><Button className="btn-hero gap-2"><Search className="h-4 w-4" />{t("nav_browse")}</Button></Link>
         </div>
 
+        {adminCount === 0 && (
+          <div className="mt-6 glow-card rounded-2xl p-5 border border-accent/40">
+            <div className="flex items-start gap-3">
+              <ShieldCheck className="h-5 w-5 text-accent mt-0.5" />
+              <div className="flex-1">
+                <h3 className="font-medium">Bootstrap an admin</h3>
+                <p className="mt-1 text-sm text-muted-foreground">No admin exists yet. Since you're the first user, you can claim the admin role to review seller IDs and manage the marketplace.</p>
+              </div>
+              <Button size="sm" className="btn-hero" onClick={async () => {
+                try { await claim(); await refresh(); toast.success("You're now an admin."); }
+                catch (e: any) { toast.error(e.message); }
+              }}>Claim admin</Button>
+            </div>
+          </div>
+        )}
+
+
         <h2 className="mt-8 font-display text-xl flex items-center gap-2"><Mail className="h-5 w-5 text-accent" />Messages</h2>
         {!messages || messages.length === 0 ? (
           <div className="mt-3 glow-card rounded-2xl p-12 text-center text-muted-foreground">No messages yet.</div>

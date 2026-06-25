@@ -9,7 +9,9 @@ const sessionConfig = () => ({
   password: process.env.SESSION_SECRET!,
   name: "suqlink-admin",
   maxAge: 60 * 60 * 8, // 8 hours
-  cookie: { httpOnly: true, secure: true, sameSite: "lax" as const, path: "/" },
+  // sameSite=none + secure lets the cookie persist when the app is loaded
+  // inside the Lovable preview iframe and in mobile in-app browsers.
+  cookie: { httpOnly: true, secure: true, sameSite: "none" as const, path: "/" },
 });
 
 function passwordMatches(input: string, expected: string) {

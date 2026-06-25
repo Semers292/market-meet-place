@@ -11,8 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as BrowseRouteImport } from './routes/browse'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ListingsIdRouteImport } from './routes/listings.$id'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedSellerDashboardRouteImport } from './routes/_authenticated/seller.dashboard'
+import { Route as AuthenticatedBuyerDashboardRouteImport } from './routes/_authenticated/buyer.dashboard'
+import { Route as AuthenticatedSellerListingsNewRouteImport } from './routes/_authenticated/seller.listings.new'
 
 const BrowseRoute = BrowseRouteImport.update({
   id: '/browse',
@@ -22,6 +27,10 @@ const BrowseRoute = BrowseRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -34,36 +43,99 @@ const ListingsIdRoute = ListingsIdRouteImport.update({
   path: '/listings/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSellerDashboardRoute =
+  AuthenticatedSellerDashboardRouteImport.update({
+    id: '/seller/dashboard',
+    path: '/seller/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedBuyerDashboardRoute =
+  AuthenticatedBuyerDashboardRouteImport.update({
+    id: '/buyer/dashboard',
+    path: '/buyer/dashboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedSellerListingsNewRoute =
+  AuthenticatedSellerListingsNewRouteImport.update({
+    id: '/seller/listings/new',
+    path: '/seller/listings/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/browse': typeof BrowseRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
+  '/seller/dashboard': typeof AuthenticatedSellerDashboardRoute
+  '/seller/listings/new': typeof AuthenticatedSellerListingsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/browse': typeof BrowseRoute
+  '/admin': typeof AuthenticatedAdminRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
+  '/seller/dashboard': typeof AuthenticatedSellerDashboardRoute
+  '/seller/listings/new': typeof AuthenticatedSellerListingsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/auth': typeof AuthRoute
   '/browse': typeof BrowseRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/listings/$id': typeof ListingsIdRoute
+  '/_authenticated/buyer/dashboard': typeof AuthenticatedBuyerDashboardRoute
+  '/_authenticated/seller/dashboard': typeof AuthenticatedSellerDashboardRoute
+  '/_authenticated/seller/listings/new': typeof AuthenticatedSellerListingsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/browse' | '/listings/$id'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/browse'
+    | '/admin'
+    | '/listings/$id'
+    | '/buyer/dashboard'
+    | '/seller/dashboard'
+    | '/seller/listings/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/browse' | '/listings/$id'
-  id: '__root__' | '/' | '/auth' | '/browse' | '/listings/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/browse'
+    | '/admin'
+    | '/listings/$id'
+    | '/buyer/dashboard'
+    | '/seller/dashboard'
+    | '/seller/listings/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/browse'
+    | '/_authenticated/admin'
+    | '/listings/$id'
+    | '/_authenticated/buyer/dashboard'
+    | '/_authenticated/seller/dashboard'
+    | '/_authenticated/seller/listings/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   BrowseRoute: typeof BrowseRoute
   ListingsIdRoute: typeof ListingsIdRoute
@@ -85,6 +157,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -99,11 +178,57 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ListingsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/seller/dashboard': {
+      id: '/_authenticated/seller/dashboard'
+      path: '/seller/dashboard'
+      fullPath: '/seller/dashboard'
+      preLoaderRoute: typeof AuthenticatedSellerDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/buyer/dashboard': {
+      id: '/_authenticated/buyer/dashboard'
+      path: '/buyer/dashboard'
+      fullPath: '/buyer/dashboard'
+      preLoaderRoute: typeof AuthenticatedBuyerDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/seller/listings/new': {
+      id: '/_authenticated/seller/listings/new'
+      path: '/seller/listings/new'
+      fullPath: '/seller/listings/new'
+      preLoaderRoute: typeof AuthenticatedSellerListingsNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedBuyerDashboardRoute: typeof AuthenticatedBuyerDashboardRoute
+  AuthenticatedSellerDashboardRoute: typeof AuthenticatedSellerDashboardRoute
+  AuthenticatedSellerListingsNewRoute: typeof AuthenticatedSellerListingsNewRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedBuyerDashboardRoute: AuthenticatedBuyerDashboardRoute,
+  AuthenticatedSellerDashboardRoute: AuthenticatedSellerDashboardRoute,
+  AuthenticatedSellerListingsNewRoute: AuthenticatedSellerListingsNewRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   BrowseRoute: BrowseRoute,
   ListingsIdRoute: ListingsIdRoute,

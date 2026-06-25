@@ -49,11 +49,16 @@ function UnlockScreen({ onUnlocked }: { onUnlocked: () => void }) {
     setBusy(true);
     try {
       const res = await unlock({ data: { password: pw } });
-      if (res.ok) { toast.success("Welcome, admin."); onUnlocked(); }
-      else toast.error("Incorrect password");
+      if (res.ok) {
+        toast.success("Welcome, admin.");
+        onUnlocked();
+        // Hard reload so the new session cookie is picked up everywhere.
+        setTimeout(() => window.location.reload(), 200);
+      } else toast.error("Incorrect password");
     } catch (e: any) { toast.error(e.message); }
     finally { setBusy(false); setPw(""); }
   };
+
 
   return (
     <div className="min-h-screen flex flex-col">

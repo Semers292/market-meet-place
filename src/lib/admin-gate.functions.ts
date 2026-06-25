@@ -126,7 +126,53 @@ export const adminListListings = createServerFn({ method: "POST" }).handler(asyn
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
   const { data } = await supabaseAdmin
     .from("listings")
-    .select("id, title, price, currency, status, created_at, profiles!listings_seller_id_fkey(phone)")
+    .select("id, title, description, price, currency, status, created_at, rejection_reason, listing_images(url), profiles!listings_seller_id_fkey(phone, full_name)")
     .order("created_at", { ascending: false }).limit(500);
   return { rows: data ?? [] };
 });
+
+export const adminReviewListing = createServerFn({ method: "POST" })
+  .inputValidator((d: { listingId: string; action: "approve" | "reject"; reason?: string }) =>
+    z.object({
+      listingId: z.string().uuid(),
+      action: z.enum(["approve", "reject"]),
+      reason: z.string().max(500).optional(),
+    }).parse(d))
+  .handler(async ({ data }) => {
+    await requireAdminUnlocked();
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const newStatus = data.action === "approve" ? "active" : "rejected";
+    const { data: updated, error } = await supabaseAdmin.from("listings").update({
+      status: newStatus,
+      rejection_reason: data.action === "reject" ? data.reason ?? null : null,
+    }).eq("id", data.listingId).select("seller_id, title").maybeSingle();
+    if (error) throw new Error(error.message);
+
+    await supabaseAdmin.from("admin_logs").insert({
+      admin_id: null,
+      action: `listing_${data.action}`,
+      target: data.listingId,
+      metadata: data.reason ? { reason: data.reason } : null,
+    });
+
+    if (updated?.seller_id) {
+      const { data: profile } = await supabaseAdmin.from("profiles").select("phone").eq("id", updated.seller_id).maybeSingle();
+      if (profile?.phone) {
+        const apiKey = process.env.TEXTBEE_API_KEY, deviceId = process.env.TEXTBEE_DEVICE_ID;
+        if (apiKey && deviceId) {
+          const msg = data.action === "approve"
+            ? `Your SuqLink listing "${updated.title}" is approved and now live.`
+            : `Your SuqLink listing "${updated.title}" was rejected. ${data.reason ?? ""}`.trim();
+          try {
+            await fetch(`https://api.textbee.dev/api/v1/gateway/devices/${deviceId}/send-sms`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json", "x-api-key": apiKey },
+              body: JSON.stringify({ recipients: [profile.phone], message: msg }),
+            });
+          } catch (e) { console.error("[sms] notify listing review failed", e); }
+        }
+      }
+    }
+    return { ok: true };
+  });
+

@@ -120,6 +120,7 @@ function AdminPanel({ onLocked }: { onLocked: () => void }) {
           ))}
         </div>
         <div className="mt-6">
+          {tab === "pending-listings" && <PendingListingsTab />}
           {tab === "sellers" && <SellersTab />}
           {tab === "users" && <UsersTab />}
           {tab === "listings" && <ListingsTab />}

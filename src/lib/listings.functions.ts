@@ -157,3 +157,15 @@ export const adminPromote = createServerFn({ method: "POST" })
     await supabaseAdmin.from("user_roles").upsert({ user_id: data.userId, role: "admin" }, { onConflict: "user_id,role" });
     return { ok: true };
   });
+
+// One-time bootstrap: the very first signed-in user can claim admin if no admin exists yet.
+export const claimFirstAdmin = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { userId } = context;
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { count } = await supabaseAdmin.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "admin");
+    if ((count ?? 0) > 0) throw new Error("An admin already exists");
+    await supabaseAdmin.from("user_roles").upsert({ user_id: userId, role: "admin" }, { onConflict: "user_id,role" });
+    return { ok: true };
+  });

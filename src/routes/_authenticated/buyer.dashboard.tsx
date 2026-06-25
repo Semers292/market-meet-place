@@ -1,15 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { useServerFn } from "@tanstack/react-start";
-import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
-import { Mail, Search, ShieldCheck } from "lucide-react";
+import { Mail, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { claimFirstAdmin } from "@/lib/listings.functions";
 
 export const Route = createFileRoute("/_authenticated/buyer/dashboard")({
   head: () => ({ meta: [{ title: "Buyer dashboard · SuqLink" }] }),
@@ -17,16 +14,8 @@ export const Route = createFileRoute("/_authenticated/buyer/dashboard")({
 });
 
 function BuyerDashboard() {
-  const { user, refresh } = useAuth();
+  const { user } = useAuth();
   const { t } = useI18n();
-  const claim = useServerFn(claimFirstAdmin);
-  const { data: adminCount } = useQuery({
-    queryKey: ["admin-count"],
-    queryFn: async () => {
-      const { count } = await supabase.from("user_roles").select("*", { count: "exact", head: true }).eq("role", "admin");
-      return count ?? 0;
-    },
-  });
   const { data: messages } = useQuery({
     queryKey: ["my-messages", user?.id],
     queryFn: async () => {
@@ -49,21 +38,6 @@ function BuyerDashboard() {
           <Link to="/browse"><Button className="btn-hero gap-2"><Search className="h-4 w-4" />{t("nav_browse")}</Button></Link>
         </div>
 
-        {adminCount === 0 && (
-          <div className="mt-6 glow-card rounded-2xl p-5 border border-accent/40">
-            <div className="flex items-start gap-3">
-              <ShieldCheck className="h-5 w-5 text-accent mt-0.5" />
-              <div className="flex-1">
-                <h3 className="font-medium">Bootstrap an admin</h3>
-                <p className="mt-1 text-sm text-muted-foreground">No admin exists yet. Since you're the first user, you can claim the admin role to review seller IDs and manage the marketplace.</p>
-              </div>
-              <Button size="sm" className="btn-hero" onClick={async () => {
-                try { await claim(); await refresh(); toast.success("You're now an admin."); }
-                catch (e: any) { toast.error(e.message); }
-              }}>Claim admin</Button>
-            </div>
-          </div>
-        )}
 
 
         <h2 className="mt-8 font-display text-xl flex items-center gap-2"><Mail className="h-5 w-5 text-accent" />Messages</h2>

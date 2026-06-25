@@ -1,43 +1,115 @@
-import { createFileRoute, redirect, Link } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
-import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { listPendingSellers, reviewSeller } from "@/lib/listings.functions";
-import { CheckCircle, XCircle, Users, ListChecks, ShieldCheck, MessageSquare } from "lucide-react";
+import {
+  adminStatus, adminUnlock, adminLock,
+  adminListPendingSellers, adminReviewSeller,
+  adminListUsers, adminListListings,
+} from "@/lib/admin-gate.functions";
+import { CheckCircle, XCircle, Users, ListChecks, ShieldCheck, Lock, LogOut } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Admin · SuqLink" }] }),
-  beforeLoad: async ({ context }) => {
-    const user = (context as any).user;
-    if (!user) throw redirect({ to: "/auth" });
-    const { data } = await supabase.from("user_roles").select("role").eq("user_id", user.id).eq("role", "admin").maybeSingle();
-    if (!data) throw redirect({ to: "/" });
-  },
-  component: AdminPage,
+export const Route = createFileRoute("/admin")({
+  head: () => ({ meta: [{ title: "Admin · SuqLink" }, { name: "robots", content: "noindex,nofollow" }] }),
+  component: AdminGate,
 });
 
-function AdminPage() {
-  const { t } = useI18n();
-  const [tab, setTab] = useState<"sellers" | "users" | "listings">("sellers");
+function AdminGate() {
+  const status = useServerFn(adminStatus);
+  const { data, isLoading, refetch } = useQuery({
+    queryKey: ["admin-status"],
+    queryFn: () => status(),
+  });
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <SiteHeader />
+        <main className="flex-1 grid place-items-center text-muted-foreground">Loading…</main>
+        <SiteFooter />
+      </div>
+    );
+  }
+  if (!data?.unlocked) return <UnlockScreen onUnlocked={() => refetch()} />;
+  return <AdminPanel onLocked={() => refetch()} />;
+}
+
+function UnlockScreen({ onUnlocked }: { onUnlocked: () => void }) {
+  const unlock = useServerFn(adminUnlock);
+  const [pw, setPw] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const res = await unlock({ data: { password: pw } });
+      if (res.ok) { toast.success("Welcome, admin."); onUnlocked(); }
+      else toast.error("Incorrect password");
+    } catch (e: any) { toast.error(e.message); }
+    finally { setBusy(false); setPw(""); }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <SiteHeader />
+      <main className="flex-1 grid place-items-center px-4">
+        <form onSubmit={submit} className="glow-card w-full max-w-md rounded-2xl p-8 space-y-5">
+          <div className="flex items-center gap-3">
+            <div className="grid h-12 w-12 place-items-center rounded-xl bg-primary/15 text-primary">
+              <Lock className="h-6 w-6" />
+            </div>
+            <div>
+              <h1 className="font-display text-2xl font-semibold">Admin portal</h1>
+              <p className="text-sm text-muted-foreground">Enter the admin password to continue.</p>
+            </div>
+          </div>
+          <Input
+            type="password"
+            autoFocus
+            autoComplete="current-password"
+            placeholder="Password"
+            value={pw}
+            onChange={(e) => setPw(e.target.value)}
+            className="bg-surface-2"
+          />
+          <Button type="submit" disabled={busy || !pw} className="btn-hero w-full">
+            {busy ? "Checking…" : "Unlock"}
+          </Button>
+          <Link to="/" className="block text-center text-xs text-muted-foreground hover:text-foreground">
+            Back to home
+          </Link>
+        </form>
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}
+
+function AdminPanel({ onLocked }: { onLocked: () => void }) {
+  const lock = useServerFn(adminLock);
+  const [tab, setTab] = useState<"sellers" | "users" | "listings">("sellers");
   const tabs = [
-    { id: "sellers", label: t("pending_sellers"), icon: ShieldCheck },
-    { id: "users", label: t("all_users"), icon: Users },
-    { id: "listings", label: t("all_listings"), icon: ListChecks },
+    { id: "sellers", label: "Pending sellers", icon: ShieldCheck },
+    { id: "users", label: "All users", icon: Users },
+    { id: "listings", label: "All listings", icon: ListChecks },
   ] as const;
 
   return (
     <div className="min-h-screen flex flex-col">
       <SiteHeader />
       <main className="flex-1 mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
-        <h1 className="font-display text-3xl font-semibold">{t("admin")}</h1>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="font-display text-3xl font-semibold">Admin</h1>
+          <Button variant="outline" size="sm" className="gap-2" onClick={async () => { await lock(); onLocked(); toast.success("Locked"); }}>
+            <LogOut className="h-4 w-4" />Lock
+          </Button>
+        </div>
         <div className="mt-6 flex flex-wrap gap-2 border-b border-border">
           {tabs.map((x) => (
             <button key={x.id} onClick={() => setTab(x.id as any)}
@@ -58,8 +130,8 @@ function AdminPage() {
 }
 
 function SellersTab() {
-  const list = useServerFn(listPendingSellers);
-  const review = useServerFn(reviewSeller);
+  const list = useServerFn(adminListPendingSellers);
+  const review = useServerFn(adminReviewSeller);
   const qc = useQueryClient();
   const { data, isLoading } = useQuery({
     queryKey: ["admin-pending"],
@@ -77,7 +149,7 @@ function SellersTab() {
     } catch (e: any) { toast.error(e.message); }
   };
 
-  if (isLoading) return <div className="text-muted-foreground">{`Loading…`}</div>;
+  if (isLoading) return <div className="text-muted-foreground">Loading…</div>;
   if (!data || data.length === 0) return <div className="glow-card rounded-2xl p-12 text-center text-muted-foreground">No sellers to review.</div>;
 
   return (
@@ -120,10 +192,8 @@ function SellersTab() {
 }
 
 function UsersTab() {
-  const { data } = useQuery({
-    queryKey: ["admin-users"],
-    queryFn: async () => (await supabase.from("profiles").select("*").order("created_at", { ascending: false }).limit(200)).data ?? [],
-  });
+  const list = useServerFn(adminListUsers);
+  const { data } = useQuery({ queryKey: ["admin-users"], queryFn: async () => (await list()).rows });
   return (
     <div className="glow-card rounded-2xl overflow-hidden">
       <table className="w-full text-sm">
@@ -145,10 +215,8 @@ function UsersTab() {
 }
 
 function ListingsTab() {
-  const { data } = useQuery({
-    queryKey: ["admin-listings"],
-    queryFn: async () => (await supabase.from("listings").select("id, title, price, currency, status, created_at, profiles!listings_seller_id_fkey(phone)").order("created_at", { ascending: false }).limit(200)).data ?? [],
-  });
+  const list = useServerFn(adminListListings);
+  const { data } = useQuery({ queryKey: ["admin-listings"], queryFn: async () => (await list()).rows });
   return (
     <div className="glow-card rounded-2xl overflow-hidden">
       <table className="w-full text-sm">

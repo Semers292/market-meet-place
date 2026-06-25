@@ -1,0 +1,1 @@
+ALTER TABLE public.admin_logs ALTER COLUMN admin_id DROP NOT NULL;

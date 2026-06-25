@@ -1,12 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
-import { Mail, Search } from "lucide-react";
+import { Mail, Search, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { claimFirstAdmin } from "@/lib/listings.functions";
 
 export const Route = createFileRoute("/_authenticated/buyer/dashboard")({
   head: () => ({ meta: [{ title: "Buyer dashboard · SuqLink" }] }),

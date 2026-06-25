@@ -65,7 +65,7 @@ function Browse() {
   });
 
   const catName = (c: any) => (lang === "am" ? c.name_am : lang === "or" ? c.name_or : lang === "so" ? c.name_so : c.name_en) || c.name_en;
-  const set = (patch: Partial<typeof search>) => nav({ search: (p) => ({ ...p, ...patch }) });
+  const set = (patch: Partial<typeof search>) => nav({ search: (p: any) => ({ ...p, ...patch }) });
 
   return (
     <div className="min-h-screen flex flex-col">

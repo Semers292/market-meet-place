@@ -93,8 +93,9 @@ function UnlockScreen({ onUnlocked }: { onUnlocked: () => void }) {
 
 function AdminPanel({ onLocked }: { onLocked: () => void }) {
   const lock = useServerFn(adminLock);
-  const [tab, setTab] = useState<"sellers" | "users" | "listings">("sellers");
+  const [tab, setTab] = useState<"sellers" | "pending-listings" | "users" | "listings">("pending-listings");
   const tabs = [
+    { id: "pending-listings", label: "Pending listings", icon: Clock },
     { id: "sellers", label: "Pending sellers", icon: ShieldCheck },
     { id: "users", label: "All users", icon: Users },
     { id: "listings", label: "All listings", icon: ListChecks },

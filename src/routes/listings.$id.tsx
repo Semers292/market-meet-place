@@ -123,6 +123,8 @@ function Detail() {
 
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{listing.description}</p>
 
+            <BuyNowButton listingId={listing.id} title={listing.title} price={listing.price} currency={listing.currency} />
+
             {/* Contact */}
             <div className="glow-card rounded-xl p-4">
               <h3 className="mb-3 font-medium">{t("contact_seller")}</h3>

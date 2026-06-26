@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { publicUrl } from "./index";
 import { notifySellerInquiry } from "@/lib/messages.functions";
 import { Phone, Send, MapPin, Calendar, MessageSquare } from "lucide-react";
+import { BuyNowButton } from "@/components/BuyNowButton";
 
 export const Route = createFileRoute("/listings/$id")({
   head: ({ params }) => ({ meta: [{ title: `Listing · SuqLink` }] }),
@@ -121,6 +122,8 @@ function Detail() {
             )}
 
             <p className="whitespace-pre-wrap text-sm leading-relaxed text-foreground/90">{listing.description}</p>
+
+            <BuyNowButton listingId={listing.id} title={listing.title} price={listing.price} currency={listing.currency} />
 
             {/* Contact */}
             <div className="glow-card rounded-xl p-4">

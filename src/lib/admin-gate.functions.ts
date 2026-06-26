@@ -54,18 +54,31 @@ export const adminLock = createServerFn({ method: "POST" }).handler(async () => 
 export const adminListPendingSellers = createServerFn({ method: "POST" }).handler(async () => {
   await requireAdminUnlocked();
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data: rows } = await supabaseAdmin
+  const { data: verifications, error } = await supabaseAdmin
     .from("seller_verifications")
-    .select("seller_id, id_front_url, id_back_url, status, created_at, rejection_reason, profiles!seller_verifications_seller_id_fkey(phone, full_name)")
+    .select("seller_id, id_front_url, id_back_url, status, created_at, rejection_reason")
     .order("created_at", { ascending: false });
+  if (error) throw new Error(error.message);
 
-  const enriched = await Promise.all((rows ?? []).map(async (r: any) => {
+  const sellerIds = (verifications ?? []).map((row) => row.seller_id);
+  const { data: profiles, error: profilesError } = sellerIds.length
+    ? await supabaseAdmin
+        .from("profiles")
+        .select("id, phone, full_name")
+        .in("id", sellerIds)
+    : { data: [], error: null };
+  if (profilesError) throw new Error(profilesError.message);
+
+  const profilesById = new Map((profiles ?? []).map((profile) => [profile.id, profile]));
+
+  const enriched = await Promise.all((verifications ?? []).map(async (r: any) => {
     const sign = async (path: string) => {
       const { data } = await supabaseAdmin.storage.from("seller-ids").createSignedUrl(path, 60 * 30);
       return data?.signedUrl ?? null;
     };
     return {
       ...r,
+      profiles: profilesById.get(r.seller_id) ?? null,
       id_front_signed: r.id_front_url ? await sign(r.id_front_url) : null,
       id_back_signed: r.id_back_url ? await sign(r.id_back_url) : null,
     };

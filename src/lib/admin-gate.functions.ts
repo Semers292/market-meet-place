@@ -102,8 +102,8 @@ export const adminReviewSeller = createServerFn({ method: "POST" })
       const apiKey = process.env.TEXTBEE_API_KEY, deviceId = process.env.TEXTBEE_DEVICE_ID;
       if (apiKey && deviceId) {
         const msg = data.action === "approve"
-          ? "Your SuqLink seller account is approved! You can now post listings."
-          : `Your SuqLink seller application was rejected. ${data.reason ?? ""}`.trim();
+          ? "SuqLink: Your seller account is APPROVED ✅. Next steps: 1) Sign in 2) Open Seller Dashboard 3) Tap 'New listing' to post your first item. Each listing is reviewed by admin before going live."
+          : `SuqLink: Your seller application was REJECTED ❌. Reason: ${data.reason ?? "Not specified"}. Next steps: 1) Fix the issue (clearer ID photos, matching name/phone) 2) Sign up again with valid documents. Questions? Reply to this number.`.trim();
         try {
           await fetch(`https://api.textbee.dev/api/v1/gateway/devices/${deviceId}/send-sms`, {
             method: "POST",

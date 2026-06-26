@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { publicUrl } from "./index";
 import { notifySellerInquiry } from "@/lib/messages.functions";
 import { Phone, Send, MapPin, Calendar, MessageSquare } from "lucide-react";
+import { BuyNowButton } from "@/components/BuyNowButton";
 
 export const Route = createFileRoute("/listings/$id")({
   head: ({ params }) => ({ meta: [{ title: `Listing · SuqLink` }] }),

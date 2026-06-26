@@ -139,11 +139,33 @@ export const adminListUsers = createServerFn({ method: "POST" }).handler(async (
 export const adminListListings = createServerFn({ method: "POST" }).handler(async () => {
   await requireAdminUnlocked();
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data } = await supabaseAdmin
+  const { data: listings, error } = await supabaseAdmin
     .from("listings")
-    .select("id, title, description, price, currency, status, created_at, rejection_reason, listing_images(url), profiles!listings_seller_id_fkey(phone, full_name)")
+    .select("id, title, description, price, currency, status, seller_id, created_at, rejection_reason, listing_images(url)")
     .order("created_at", { ascending: false }).limit(500);
-  return { rows: data ?? [] };
+  if (error) throw new Error(error.message);
+
+  const sellerIds = Array.from(new Set((listings ?? []).map((l) => l.seller_id).filter(Boolean)));
+  const { data: profiles } = sellerIds.length
+    ? await supabaseAdmin.from("profiles").select("id, phone, full_name").in("id", sellerIds)
+    : { data: [] };
+  const profilesById = new Map((profiles ?? []).map((p) => [p.id, p]));
+
+  // Sign listing image URLs (bucket is private)
+  const signImg = async (path: string) => {
+    if (!path) return null;
+    if (path.startsWith("http")) return path;
+    const { data } = await supabaseAdmin.storage.from("listing-images").createSignedUrl(path, 60 * 30);
+    return data?.signedUrl ?? null;
+  };
+
+  const rows = await Promise.all((listings ?? []).map(async (l: any) => ({
+    ...l,
+    profiles: profilesById.get(l.seller_id) ?? null,
+    listing_images: await Promise.all((l.listing_images ?? []).map(async (img: any) => ({ url: await signImg(img.url) }))),
+  })));
+
+  return { rows };
 });
 
 export const adminReviewListing = createServerFn({ method: "POST" })

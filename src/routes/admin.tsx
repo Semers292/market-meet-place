@@ -98,10 +98,10 @@ function UnlockScreen({ onUnlocked }: { onUnlocked: () => void }) {
 
 function AdminPanel({ onLocked }: { onLocked: () => void }) {
   const lock = useServerFn(adminLock);
-  const [tab, setTab] = useState<"sellers" | "pending-listings" | "users" | "listings">("pending-listings");
+  const [tab, setTab] = useState<"sellers" | "pending-listings" | "users" | "listings">("sellers");
   const tabs = [
-    { id: "pending-listings", label: "Pending listings", icon: Clock },
     { id: "sellers", label: "Pending sellers", icon: ShieldCheck },
+    { id: "pending-listings", label: "Pending listings", icon: Clock },
     { id: "users", label: "All users", icon: Users },
     { id: "listings", label: "All listings", icon: ListChecks },
   ] as const;
@@ -140,7 +140,7 @@ function SellersTab() {
   const list = useServerFn(adminListPendingSellers);
   const review = useServerFn(adminReviewSeller);
   const qc = useQueryClient();
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ["admin-pending"],
     queryFn: async () => (await list()).rows,
   });
@@ -157,6 +157,7 @@ function SellersTab() {
   };
 
   if (isLoading) return <div className="text-muted-foreground">Loading…</div>;
+  if (error) return <div className="glow-card rounded-2xl p-8 text-center text-destructive">Could not load sellers. Try locking and unlocking admin again.</div>;
   if (!data || data.length === 0) return <div className="glow-card rounded-2xl p-12 text-center text-muted-foreground">No sellers to review.</div>;
 
   return (

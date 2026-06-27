@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { publicUrl } from "./index";
+import { SignedImg } from "@/components/SignedImg";
 import { Package, MapPin } from "lucide-react";
 import { BuyNowButton } from "@/components/BuyNowButton";
 

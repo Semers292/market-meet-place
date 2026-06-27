@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Search, MessageSquare, ShieldCheck, Smartphone, Laptop, Tv, Car, Home, Sofa, Shirt, Package } from "lucide-react";
+import { SignedImg } from "@/components/SignedImg";
 
 const ICONS: Record<string, any> = { Smartphone, Laptop, Tv, Car, Home, Sofa, Shirt, Package };
 
@@ -159,7 +160,7 @@ function Index() {
                 className="group rounded-xl glow-card overflow-hidden transition hover:border-primary/50 hover:-translate-y-1">
                 <div className="aspect-[4/3] bg-surface-2 overflow-hidden">
                   {l.listing_images?.[0]?.url ? (
-                    <img src={publicUrl(l.listing_images[0].url)} alt={l.title} className="h-full w-full object-cover transition group-hover:scale-105" />
+                    <SignedImg path={l.listing_images[0].url} alt={l.title} className="h-full w-full object-cover transition group-hover:scale-105" />
                   ) : (
                     <div className="flex h-full items-center justify-center text-muted-foreground"><Package className="h-10 w-10 opacity-40" /></div>
                   )}

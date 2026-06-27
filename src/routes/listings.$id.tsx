@@ -11,6 +11,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { publicUrl } from "./index";
+import { SignedImg } from "@/components/SignedImg";
 import { notifySellerInquiry } from "@/lib/messages.functions";
 import { Phone, Send, MapPin, Calendar, MessageSquare } from "lucide-react";
 import { BuyNowButton } from "@/components/BuyNowButton";
@@ -37,8 +38,7 @@ function Detail() {
         .select(`
           *, listing_images(url, sort_order), listing_attributes(key, value),
           contact_options(type, value),
-          categories(slug, name_en),
-          profiles!listings_seller_id_fkey(full_name, phone)
+          categories(slug, name_en)
         `)
         .eq("id", id).single();
       if (error) throw error;
@@ -81,7 +81,7 @@ function Detail() {
           <div className="space-y-3">
             <div className="aspect-[4/3] overflow-hidden rounded-2xl glow-card">
               {images[0]?.url ? (
-                <img src={publicUrl(images[0].url)} alt={listing.title} className="h-full w-full object-cover" />
+                <SignedImg path={images[0].url} alt={listing.title} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full items-center justify-center text-muted-foreground">No image</div>
               )}
@@ -89,7 +89,7 @@ function Detail() {
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
                 {images.slice(1).map((img: any, i: number) => (
-                  <img key={i} src={publicUrl(img.url)} className="aspect-square w-full rounded-lg object-cover glow-card" />
+                  <SignedImg key={i} path={img.url} className="aspect-square w-full rounded-lg object-cover glow-card" />
                 ))}
               </div>
             )}

@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { publicUrl } from "./index";
+import { SignedImg } from "@/components/SignedImg";
 import { Package, MapPin } from "lucide-react";
 import { BuyNowButton } from "@/components/BuyNowButton";
 
@@ -154,7 +155,7 @@ function Browse() {
                     <Link to="/listings/$id" params={{ id: l.id }} className="block">
                       <div className="aspect-[4/3] bg-surface-2 overflow-hidden">
                         {l.listing_images?.[0]?.url ? (
-                          <img src={publicUrl(l.listing_images[0].url)} alt={l.title} className="h-full w-full object-cover transition group-hover:scale-105" />
+                          <SignedImg path={l.listing_images[0].url} alt={l.title} className="h-full w-full object-cover transition group-hover:scale-105" />
                         ) : (
                           <div className="flex h-full items-center justify-center"><Package className="h-10 w-10 opacity-40" /></div>
                         )}

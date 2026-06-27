@@ -11,6 +11,7 @@ import { useAuth } from "@/lib/auth-context";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { publicUrl } from "./index";
+import { SignedImg } from "@/components/SignedImg";
 import { notifySellerInquiry } from "@/lib/messages.functions";
 import { Phone, Send, MapPin, Calendar, MessageSquare } from "lucide-react";
 import { BuyNowButton } from "@/components/BuyNowButton";

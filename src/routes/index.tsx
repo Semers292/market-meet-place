@@ -7,6 +7,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Search, MessageSquare, ShieldCheck, Smartphone, Laptop, Tv, Car, Home, Sofa, Shirt, Package } from "lucide-react";
+import { SignedImg } from "@/components/SignedImg";
 
 const ICONS: Record<string, any> = { Smartphone, Laptop, Tv, Car, Home, Sofa, Shirt, Package };
 

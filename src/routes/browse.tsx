@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { publicUrl } from "./index";
 import { Package, MapPin } from "lucide-react";
+import { BuyNowButton } from "@/components/BuyNowButton";
 
 const searchSchema = z.object({
   category: fallback(z.string(), "").default(""),
@@ -149,23 +150,27 @@ function Browse() {
             ) : (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {(listings ?? []).map((l: any) => (
-                  <Link key={l.id} to="/listings/$id" params={{ id: l.id }}
-                    className="group rounded-xl glow-card overflow-hidden transition hover:border-primary/50 hover:-translate-y-1">
-                    <div className="aspect-[4/3] bg-surface-2 overflow-hidden">
-                      {l.listing_images?.[0]?.url ? (
-                        <img src={publicUrl(l.listing_images[0].url)} alt={l.title} className="h-full w-full object-cover transition group-hover:scale-105" />
-                      ) : (
-                        <div className="flex h-full items-center justify-center"><Package className="h-10 w-10 opacity-40" /></div>
-                      )}
-                    </div>
-                    <div className="p-4">
-                      <div className="line-clamp-1 font-medium">{l.title}</div>
-                      <div className="mt-1 text-lg font-bold text-gradient">{Number(l.price).toLocaleString()} {l.currency}</div>
-                      <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
-                        <MapPin className="h-3 w-3" />{l.location ?? "—"}{l.condition ? ` · ${l.condition}` : ""}
+                  <div key={l.id} className="group rounded-xl glow-card overflow-hidden transition hover:border-primary/50 hover:-translate-y-1 flex flex-col">
+                    <Link to="/listings/$id" params={{ id: l.id }} className="block">
+                      <div className="aspect-[4/3] bg-surface-2 overflow-hidden">
+                        {l.listing_images?.[0]?.url ? (
+                          <img src={publicUrl(l.listing_images[0].url)} alt={l.title} className="h-full w-full object-cover transition group-hover:scale-105" />
+                        ) : (
+                          <div className="flex h-full items-center justify-center"><Package className="h-10 w-10 opacity-40" /></div>
+                        )}
                       </div>
+                      <div className="p-4">
+                        <div className="line-clamp-1 font-medium">{l.title}</div>
+                        <div className="mt-1 text-lg font-bold text-gradient">{Number(l.price).toLocaleString()} {l.currency}</div>
+                        <div className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+                          <MapPin className="h-3 w-3" />{l.location ?? "—"}{l.condition ? ` · ${l.condition}` : ""}
+                        </div>
+                      </div>
+                    </Link>
+                    <div className="px-4 pb-4 mt-auto">
+                      <BuyNowButton listingId={l.id} title={l.title} price={l.price} currency={l.currency} />
                     </div>
-                  </Link>
+                  </div>
                 ))}
               </div>
             )}

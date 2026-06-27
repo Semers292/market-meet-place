@@ -97,7 +97,7 @@ function SellerDashboard() {
               <Link key={l.id} to="/listings/$id" params={{ id: l.id }}
                 className="rounded-xl glow-card overflow-hidden hover:border-primary/50">
                 <div className="aspect-[4/3] bg-surface-2">
-                  {l.listing_images?.[0]?.url && <img src={publicUrl(l.listing_images[0].url)} className="h-full w-full object-cover" />}
+                  {l.listing_images?.[0]?.url && <SignedImg path={l.listing_images[0].url} className="h-full w-full object-cover" />}
                 </div>
                 <div className="p-3">
                   <div className="line-clamp-1 font-medium">{l.title}</div>

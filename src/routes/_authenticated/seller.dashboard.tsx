@@ -6,7 +6,7 @@ import { SiteFooter } from "@/components/SiteFooter";
 import { useAuth } from "@/lib/auth-context";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
-import { publicUrl } from "@/routes/index";
+import { SignedImg } from "@/components/SignedImg";
 import { Plus, Clock, CheckCircle, XCircle, Package } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/seller/dashboard")({

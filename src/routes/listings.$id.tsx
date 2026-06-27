@@ -82,7 +82,7 @@ function Detail() {
           <div className="space-y-3">
             <div className="aspect-[4/3] overflow-hidden rounded-2xl glow-card">
               {images[0]?.url ? (
-                <img src={publicUrl(images[0].url)} alt={listing.title} className="h-full w-full object-cover" />
+                <SignedImg path={images[0].url} alt={listing.title} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full items-center justify-center text-muted-foreground">No image</div>
               )}

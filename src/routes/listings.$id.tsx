@@ -38,8 +38,7 @@ function Detail() {
         .select(`
           *, listing_images(url, sort_order), listing_attributes(key, value),
           contact_options(type, value),
-          categories(slug, name_en),
-          profiles!listings_seller_id_fkey(full_name, phone)
+          categories(slug, name_en)
         `)
         .eq("id", id).single();
       if (error) throw error;

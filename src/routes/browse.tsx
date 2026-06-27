@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider";
 import { publicUrl } from "./index";
 import { Package, MapPin } from "lucide-react";
+import { BuyNowButton } from "@/components/BuyNowButton";
 
 const searchSchema = z.object({
   category: fallback(z.string(), "").default(""),

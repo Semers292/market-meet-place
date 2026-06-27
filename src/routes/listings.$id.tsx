@@ -90,7 +90,7 @@ function Detail() {
             {images.length > 1 && (
               <div className="grid grid-cols-4 gap-2">
                 {images.slice(1).map((img: any, i: number) => (
-                  <img key={i} src={publicUrl(img.url)} className="aspect-square w-full rounded-lg object-cover glow-card" />
+                  <SignedImg key={i} path={img.url} className="aspect-square w-full rounded-lg object-cover glow-card" />
                 ))}
               </div>
             )}
